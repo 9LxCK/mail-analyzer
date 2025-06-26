@@ -5,13 +5,14 @@ logger = LoggerManager.get_logger(__name__)
 import imaplib
 import random
 import re
+import threading
 from collections import defaultdict
 from datetime import datetime, timedelta
 from email.parser import HeaderParser
 from typing import Dict, Iterator, List, Literal, Optional, Tuple
 
 from tqdm import tqdm
-import threading
+
 lock = threading.Lock()
 
 from app_config.config_loader import ConfigLoader
@@ -318,7 +319,9 @@ def fetch_email_body(imap: imaplib.IMAP4_SSL, email_records: EmailRecords, pbar:
     logger.debug(
         f"(1件目データ) メールボックス: {first_key[0]} / UID: {first_key[1]} / Subject: {subject_preview!r} / Body: {body_preview!r}"
     )
-    logger.debug(f"全件数: {total_count} / 全サイズ: {total_size} / 平均サイズ: {format_size(int(total_size / total_count))}")
+    logger.debug(
+        f"全件数: {total_count} / 全サイズ: {total_size} / 平均サイズ: {format_size(int(total_size / total_count))}"
+    )
 
     return email_records
 

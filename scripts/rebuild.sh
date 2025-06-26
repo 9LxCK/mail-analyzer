@@ -3,7 +3,7 @@
 # 定数定義
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$SCRIPT_DIR/.."
-REQUIREMENTS_TXT="$SCRIPT_DIR/requirements.txt"
+REQUIREMENTS_TXT="$PROJECT_ROOT/requirements.txt"
 VENV_DIR="$PROJECT_ROOT/.venv"
 CLEANUP_SH="$SCRIPT_DIR/cleanup.sh"
 

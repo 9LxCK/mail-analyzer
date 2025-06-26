@@ -13,6 +13,7 @@ config_loader.py
 import json
 import os
 from typing import Any, Dict
+
 from app_config.constants import CONFIG_JSON_PATH, DEFAULT_ENCODING
 from util import get_base_path
 
@@ -48,6 +49,7 @@ class ConfigLoader:
         with open(json_path, encoding=DEFAULT_ENCODING) as f:
             print(f"システム設定ファイルを読み込みます: {json_path}")
             return json.load(f)
+
 
 """
 シングルトンでインスタンス化するため、実行スクリプトの最初にinitialize() を呼び出す

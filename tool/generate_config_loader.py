@@ -1,28 +1,12 @@
 #!/usr/bin/env python
 import json
 import os
+
 # import sys
 from datetime import datetime
 from typing import Any
 
 from util import find_project_root
-
-
-# プロジェクトルートを動的に sys.path に追加
-# def find_project_root(markers=("pyproject.toml", ".git", "config")) -> str:
-#     current = os.path.abspath(os.path.dirname(__file__))
-#     while current != os.path.dirname(current):
-#         if any(os.path.exists(os.path.join(current, marker)) for marker in markers):
-#             return current
-#         current = os.path.dirname(current)
-#     raise RuntimeError("プロジェクトルートが見つかりません")
-
-
-# # プロジェクトルートを sys.path に追加
-# def add_project_root_to_sys_path():
-#     root = find_project_root()
-#     if root not in sys.path:
-#         sys.path.insert(0, root)
 
 
 # 自動生成コード用のヘッダdocstringを作成

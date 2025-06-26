@@ -82,6 +82,7 @@ def iter_mailbox_batches_from_uid_map(
         for uid_batch in _chunked(uid_list, fetch_size):
             yield (mailbox, uid_batch)
 
+
 def extract_subject_and_body(rfc822_bytes: bytes) -> Tuple[str, str]:
     """
     RFC822形式のメールデータから Subject と Body を抽出する。

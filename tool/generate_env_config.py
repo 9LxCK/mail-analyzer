@@ -1,7 +1,8 @@
 #!/usr/bin/env python
-from datetime import datetime
-import os
 import argparse
+import os
+from datetime import datetime
+
 from dotenv import dotenv_values
 
 from util import to_snake_case
@@ -10,6 +11,7 @@ ENV_PATH = ".env"
 script_name = os.path.basename(__file__)  # ファイル名のみ取得
 OUTPUT_PATH = f"app_config/{script_name.replace('generate_', '')}"
 SPLIT_MARK = "# --- 任意キー ---"
+
 
 # 自動生成コード用のヘッダdocstringを作成
 def generate_docstring_header(target_filename: str, generator_script: str) -> str:
@@ -59,6 +61,7 @@ def parse_env_keys(env_path: str):
 
     return required_keys, optional_keys
 
+
 def infer_type(value: str):
     if value is None or value == "":
         return "str", '""'
@@ -83,6 +86,7 @@ def infer_type(value: str):
     escaped = value.replace('"', '\\"')
     return "str", f'"{escaped}"'
 
+
 def generate_env_config(output_path: str):
     required_keys, optional_keys = parse_env_keys(ENV_PATH)
     env_vars = dotenv_values(ENV_PATH)
@@ -96,7 +100,7 @@ def generate_env_config(output_path: str):
     for key in required_keys:
         method_name = to_snake_case(key)
         raw_val = env_vars.get(key, "")
-        typ, default_val = infer_type(raw_val) # type: ignore supress warning
+        typ, default_val = infer_type(raw_val)  # type: ignore supress warning
         lines.append(f"{indent}@classmethod")
         lines.append(f"{indent}def {method_name}(cls) -> {typ}:")
         conv_code = {
@@ -111,7 +115,7 @@ def generate_env_config(output_path: str):
     for key in optional_keys:
         method_name = to_snake_case(key)
         raw_val = env_vars.get(key, "")
-        typ, default_val = infer_type(raw_val) # type: ignore supress warning
+        typ, default_val = infer_type(raw_val)  # type: ignore supress warning
         lines.append(f"{indent}@classmethod")
         lines.append(f"{indent}def {method_name}(cls) -> {typ}:")
         conv_code = {
@@ -136,16 +140,15 @@ def generate_env_config(output_path: str):
 
     print(f"✅ {script_name} を生成しました: {output_path}")
 
+
 def main():
     parser = argparse.ArgumentParser(description=".envファイルからEnvConfigクラスを自動生成します。")
     parser.add_argument(
-        "-o", "--output",
-        type=str,
-        default=OUTPUT_PATH,
-        help=f"出力先ファイルパス（デフォルト: {OUTPUT_PATH}）"
+        "-o", "--output", type=str, default=OUTPUT_PATH, help=f"出力先ファイルパス（デフォルト: {OUTPUT_PATH}）"
     )
     args = parser.parse_args()
     generate_env_config(args.output)
+
 
 if __name__ == "__main__":
     main()

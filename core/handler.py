@@ -1,7 +1,8 @@
-from concurrent.futures import ThreadPoolExecutor
 import imaplib
+from concurrent.futures import ThreadPoolExecutor
 
 from tqdm import tqdm
+
 from app_config.config_loader import ConfigLoader
 from app_config.logger_manager import LoggerManager
 
@@ -63,12 +64,13 @@ def email_fetch_handler(mail_count: Optional[int] = None, is_multi_thread: bool 
         if not is_multi_thread:
             with tqdm(total=len(email_records), desc="本文抽出中", unit="件", ncols=80) as progress_bar:
                 email_records = fetch_email_body(imap, email_records, progress_bar)
-    
+
     if is_multi_thread:
-        def fetch_email_body_handler(email_records: dict):   
+
+        def fetch_email_body_handler(email_records: dict):
             with connect_and_login_imap(encrypt_host, encrypt_user, encrypt_pass) as imap:
                 return fetch_email_body(imap, email_records, pbar=progress_bar)
-        
+
         batches = split_evenly(email_records, ConfigLoader.SPLIT_WORKERS)
         with tqdm(total=len(email_records), desc="本文抽出中", unit="件", ncols=80) as progress_bar:
             with ThreadPoolExecutor(max_workers=ConfigLoader.SPLIT_WORKERS) as executor:
@@ -80,7 +82,6 @@ def email_fetch_handler(mail_count: Optional[int] = None, is_multi_thread: bool 
                     result = future.result()  # 各スレッドの戻り値を取得
                     # print(result)
                     email_records.update(result)
-            
 
     # メールの内容をファイルに出力
     output_filepath = add_date_suffix_to_path(ConfigLoader.OUTPUT_FILE_PATH)
@@ -104,5 +105,5 @@ def _extract_email_uids(imap: imaplib.IMAP4_SSL, mail_count: Optional[int] = Non
     # メールの並び替え・件数での抽出
     email_records = filter_and_sort_records(email_records, order="desc", limit=mail_count)
     logger.debug(f"処理対象件数: {len(email_records)}")
-        
+
     return email_records

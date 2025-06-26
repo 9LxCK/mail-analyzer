@@ -3,13 +3,13 @@ import inspect
 import json
 import logging
 import os
-from pathlib import Path
 import re
 import sys
 import time
 from collections import defaultdict
 from email.header import decode_header
 from functools import wraps
+from pathlib import Path
 from typing import Dict, List, Tuple, TypeVar, Union, cast
 
 import imap_tools.imap_utf7
@@ -304,20 +304,19 @@ def get_fallback_logger(name: str = "default") -> logging.Logger:
 def format_size(size_in_bytes: int) -> str:
     if size_in_bytes < 1024:
         return f"{size_in_bytes} B"
-    elif size_in_bytes < 1024 ** 2:
+    elif size_in_bytes < 1024**2:
         return f"{size_in_bytes / 1024:.2f} KB"
     else:
         return f"{size_in_bytes / (1024 ** 2):.2f} MB"
-    
+
 
 K = TypeVar("K")
 V = TypeVar("V")
 T = TypeVar("T")
+
+
 # なるべく均等にN分割する関数
-def split_evenly(
-    data: Union[List[T], Dict[K, V]],
-    n: int
-) -> Union[List[List[T]], List[Dict[K, V]]]:
+def split_evenly(data: Union[List[T], Dict[K, V]], n: int) -> Union[List[List[T]], List[Dict[K, V]]]:
     if isinstance(data, dict):
         items = list(data.items())
         is_dict = True
@@ -335,7 +334,7 @@ def split_evenly(
     start = 0
     for i in range(n):
         size = base_size + (1 if i < remainder else 0)
-        chunk = cast(List[Tuple[K, V]], items[start:start + size])
+        chunk = cast(List[Tuple[K, V]], items[start : start + size])
         if is_dict:
             result.append(dict(chunk))
         else:
@@ -347,7 +346,7 @@ def split_evenly(
 
 # スネークケースに変換
 def to_snake_case(key: str) -> str:
-    return re.sub(r'[^a-z0-9]', '_', key.lower())
+    return re.sub(r"[^a-z0-9]", "_", key.lower())
 
 
 def find_project_root(markers: list[str] = ["pyproject.toml", ".git", "requirements.txt"]) -> Path:
