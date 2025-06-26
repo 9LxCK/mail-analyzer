@@ -1,0 +1,12 @@
+{
+  "FETCH_SIZE": 500,
+  "MAILS_MAX_COUNT": 10000,
+  "OUTPUT_FILE_PATH": "output/mail.txt",
+  "MAILBOX_LIST_PATH": "output/mailbox_list.txt",
+  "LOG_FILE_PATH": "log/app.log",
+  "LOG_LEVEL": "DEBUG",
+  "USE_USER_INPUT": false,
+  "IS_MULTI_THREADED": true,
+  "SPLIT_WORKERS": 4,
+  "EXIT_DELAY_SECONDS": 0
+}

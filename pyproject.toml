@@ -1,0 +1,59 @@
+[project]
+name = "mail-analysis"
+version = "0.1.0"
+description = "メール分析ツール"
+authors = [
+    {name = "Your Name",email = "you@example.com"}
+]
+
+packages = [
+    { include = "config" },
+    { include = "core" }
+]
+
+include = [
+    "run_fetch_mails.py",
+    "run_list_mailboxes.py"
+]
+# readme = "README.md"
+# requires-python = ">=3.10,<3.14"
+dependencies = [
+    "altgraph (==0.17.4)",
+    "black (==25.1.0)",
+    "click (==8.2.1)",
+    "colorama (==0.4.6)",
+    "imap-tools (==1.10.0)",
+    "isort (==6.0.1)",
+    "mypy-extensions (==1.1.0)",
+    "packaging (==25.0)",
+    "pathspec (==0.12.1)",
+    "pefile (==2023.2.7)",
+    "platformdirs (==4.3.8)",
+    "pyinstaller (==6.14.1)",
+    "pyinstaller-hooks-contrib (==2025.5)",
+    "python-dotenv (==1.1.0)",
+    "pytoolconfig (==1.3.1)",
+    "pywin32-ctypes (==0.2.3)",
+    "rope (==1.13.0)",
+    "ruff (==0.11.13)",
+    "setuptools (==80.9.0)",
+    "tqdm (==4.67.1)"
+]
+
+[tool.poetry.scripts]
+fetch-mails = "run_fetch_mails:main"
+list-mailboxes = "run_list_mailboxes:main"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.14"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+profile = "black"
+line_length = 120
