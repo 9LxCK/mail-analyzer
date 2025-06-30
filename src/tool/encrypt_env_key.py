@@ -2,6 +2,7 @@
 import argparse
 import os
 from getpass import getpass
+from pathlib import Path
 
 from dotenv import set_key
 
@@ -27,7 +28,9 @@ logger = LoggerManager.get_logger(__name__)
 
 
 # 環境変数読込(TODO: ログ出力するため、ログ設定後に呼び出すこと)
-load_config()
+# 当該ファイルから2階層上のディレクトリを取得
+two_levels_up = Path(__file__).resolve().parents[2]
+load_config(str(two_levels_up))
 
 
 def encrypt_and_store(f: FernetCipher, host: str | None = None, user: str | None = None, password: str | None = None):

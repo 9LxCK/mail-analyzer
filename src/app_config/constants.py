@@ -28,8 +28,8 @@ class MailTupleIndex(IntEnum):
 
 
 DEFAULT_ENCODING = "utf-8"  # デフォルトのエンコーディング
-CONFIG_JSON_PATH = "app_config/config.json"  # システム設定のJSONファイルパス
 PREVIEW_LENGTH = 20  # ログ表示などでプレビュー表示する文字数
+CONFIG_JSON_PATH = "src/app_config/config.json"
 
 DEFAULT_LOG_FORMAT = "%(asctime)s [%(levelname)s] [%(threadName)s] %(name)s.%(funcName)s - %(message)s"
 DEFAULT_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"

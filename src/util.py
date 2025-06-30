@@ -109,23 +109,31 @@ def clean_text(text):
 
 
 # 基準パスを取得する
-def get_base_path():
+def get_base_path(script_path: str = "") -> str:
     if getattr(sys, "frozen", False):
         # PyInstallerでexe化された場合
         return os.path.dirname(sys.executable)
     else:
         # 通常のスクリプト実行
-        return os.path.dirname(os.path.abspath(__file__))
+        return os.path.dirname(os.path.abspath(script_path or sys.argv[0]))
 
 
-# 実行ファイルと同じ場所にある.envを読み込む
-def load_config(env_path=""):
-    # exeとして実行された場合、exeのあるディレクトリを基準にする
-    if not env_path:
-        base_path = get_base_path()
-        env_path = os.path.join(base_path, ".env")
-    if not os.path.exists(env_path):
-        raise FileNotFoundError(f"{env_path} が見つかりません。")
+# 指定があればその場所の、併せて実行ファイルと同じ場所にある.envを読み込む
+def load_config(base_path: str = ""):
+    search_paths = []
+    if base_path.strip():
+        search_paths.append(base_path.strip())
+    search_paths.append(get_base_path())
+
+    env_path = None
+    for path in search_paths:
+        candidate = os.path.join(path, ".env")
+        if os.path.isfile(candidate):
+            env_path = candidate
+            break
+    if env_path is None:
+        raise FileNotFoundError(f"環境設定ファイルが見つかりません。検索パス: {search_paths}")
+
     print(f"環境設定ファイルを読み込みます: {env_path}")
     success = load_dotenv(env_path, override=True)
     if not success:

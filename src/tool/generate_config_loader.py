@@ -36,14 +36,10 @@ def generate_docstring_header(target_filename: str, generator_script: str) -> st
 '''
 
 
-# add_project_root_to_sys_path()
-
-
 from app_config.constants import CONFIG_JSON_PATH
 
 script_name = os.path.basename(__file__)  # ファイル名のみ取得
-OUTPUT_FILE_NAME = script_name.replace("generate_", "")
-
+_OUTPUT_FILE_NAME = script_name.replace("generate_", "")
 
 def infer_type(value: Any) -> str:
     if isinstance(value, bool):
@@ -70,12 +66,12 @@ with open(CONFIG_JSON_PATH, "r", encoding="utf-8") as f:
 
 property_defs = "\n".join(f"    {key.upper()}: {infer_type(value)}" for key, value in config_data.items())
 
-template = f'''{generate_docstring_header(OUTPUT_FILE_NAME, script_name)}
+template = f'''{generate_docstring_header(_OUTPUT_FILE_NAME, script_name)}
 import json
 import os
 from typing import Any, Dict
 from app_config.constants import CONFIG_JSON_PATH, DEFAULT_ENCODING
-from util import get_base_path
+from util import get_script_name, get_base_path
 
 
 class ConfigLoader:
@@ -87,14 +83,16 @@ class ConfigLoader:
     @classmethod
     def initialize(cls) -> None:
         cls._config_data = cls._load_system_config()
+        if not cls._config_data:
+            raise ValueError("読み込みに失敗しました。")
 
         for key, value in cls._config_data.items():
             setattr(cls, key.upper(), value)
 
     @staticmethod
-    def _load_system_config(relative_path: str = CONFIG_JSON_PATH) -> dict:
-        base_path = get_base_path()
-        json_path = os.path.join(base_path, relative_path)
+    def _load_system_config() -> dict:
+        base_path = get_base_path(__file__)
+        json_path = os.path.join(base_path, get_script_name(CONFIG_JSON_PATH, True))
         if not os.path.exists(json_path):
             raise FileNotFoundError(f"{{json_path}} が見つかりません。")
         with open(json_path, encoding=DEFAULT_ENCODING) as f:
@@ -114,8 +112,8 @@ print(ConfigLoader.ALLOWED_IPS)
 '''
 
 output_dir = os.path.dirname(CONFIG_JSON_PATH)
-output_path = os.path.join(find_project_root(), output_dir, OUTPUT_FILE_NAME)
+output_path = os.path.join(find_project_root(), output_dir, _OUTPUT_FILE_NAME)
 with open(output_path, "w", encoding="utf-8") as f:
     f.write(template)
 
-print(f"✅ {OUTPUT_FILE_NAME} を生成しました: {output_path}")
+print(f"✅ {_OUTPUT_FILE_NAME} を生成しました: {output_path}")
