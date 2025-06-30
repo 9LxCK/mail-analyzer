@@ -39,7 +39,7 @@ def emailbox_list_handler():
     encrypt_pass = f.decrypt(EnvConfig.imap_pass())
     # メールボックス一覧を取得
     with connect_and_login_mailbox(encrypt_host, encrypt_user, encrypt_pass) as mailbox:
-        lines = get_mailboxes(mailbox)
+        lines = get_mailboxes(mailbox, order="desc")
     # リスト一覧をファイル出力
     filepath = ConfigLoader.MAILBOX_LIST_PATH
     result = write_lines_to_file(filepath, lines)

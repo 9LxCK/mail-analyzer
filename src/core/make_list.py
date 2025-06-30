@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Literal, Optional
 
 from app_config.logger_manager import LoggerManager
 
@@ -44,12 +44,39 @@ def connect_and_login_mailbox(host: str, user: str, password: str, initial_folde
             logger.warning(f"MailBoxログアウト中にエラーが発生しました: {e}")
 
 
-def get_mailboxes(mailbox: MailBox) -> list[str]:
+def get_mailboxes(mailbox: MailBox, order: Literal["asc", "desc"] | None = None) -> list[str]:
     # フォルダ一覧の取得
     folders = mailbox.folder.list()
     lines = []
-    lines.append("フォルダ一覧:")
     for folder in folders:
-        # folder.name は自動的に UTF-8 にデコードされている
-        lines.append(f"- {folder.name}\t({imap_tools.imap_utf7.utf7_encode(folder.name)})")
+        try:
+            status = mailbox.folder.status(folder.name)
+            utf7_name = imap_tools.imap_utf7.utf7_encode(folder.name).decode()
+            mail_count = status['MESSAGES']
+            # folder.name は自動的に UTF-8 にデコードされている
+            lines.append((folder.name, utf7_name, mail_count))
+        except Exception as e:
+            logger.error(f"MailBox接続中に予期しない例外が発生しました: {e}")
+            raise
+    
+    # メール件数降順にソート
+    if order is not None:
+        lines = _sort_mailbox_rows(lines, order)
+
+    # 出力文字列の整形
+    lines = [f"- {line[0]} ({line[1]}): {line[2]}" for line in lines]
+    lines.insert(0, "フォルダ一覧:")
+
     return lines
+
+def _sort_mailbox_rows(rows: list[tuple[str, str, int]], order: Literal["asc", "desc"] = "desc") -> list[tuple[str, str, int]]:
+    """
+    rows: (フォルダ名, UTF7フォルダ名, 件数) のリスト
+    order: "asc" または "desc"（件数の昇/降順）
+    """
+    if order == "desc":
+        # 件数降順、フォルダ名昇順
+        return sorted(rows, key=lambda x: (-x[2], x[0]))
+    else:
+        # デフォルト: 件数昇順、フォルダ名昇順
+        return sorted(rows, key=lambda x: (x[2], x[0]))
