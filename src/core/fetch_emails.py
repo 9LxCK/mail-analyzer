@@ -290,6 +290,10 @@ def fetch_email_body(imap: imaplib.IMAP4_SSL, email_records: EmailRecords, pbar:
     [メールボックス名, UID]のタプル型リストから、各メールボックスごとにUIDをfetchしてメール内容を取得する。
     """
     total_count = len(email_records)
+    if total_count == 0:
+        logger.warning("処理対象のメールがありません。")
+        return email_records
+    
     total_size = 0
     for mailbox, batch_uids in _iter_mailbox_batches(imap, email_records, ConfigLoader.FETCH_SIZE):
         try:

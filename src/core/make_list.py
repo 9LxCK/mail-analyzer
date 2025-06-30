@@ -1,13 +1,12 @@
 from typing import Literal, Optional
 
 from app_config.logger_manager import LoggerManager
+from util import encode_to_utf7
 
 logger = LoggerManager.get_logger(__name__)
 
 from contextlib import contextmanager
 
-import imap_tools
-import imap_tools.imap_utf7
 from imap_tools.mailbox import MailBox
 
 
@@ -49,9 +48,12 @@ def get_mailboxes(mailbox: MailBox, order: Literal["asc", "desc"] | None = None)
     folders = mailbox.folder.list()
     lines = []
     for folder in folders:
+        if '\\Noselect' in folder.flags:
+            logger.warning(f"フォルダ '{folder.name}' は select 不可のためスキップ")
+            continue
         try:
             status = mailbox.folder.status(folder.name)
-            utf7_name = imap_tools.imap_utf7.utf7_encode(folder.name).decode()
+            utf7_name = encode_to_utf7(folder.name)
             mail_count = status['MESSAGES']
             # folder.name は自動的に UTF-8 にデコードされている
             lines.append((folder.name, utf7_name, mail_count))

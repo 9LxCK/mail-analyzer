@@ -5,11 +5,11 @@ from datetime import datetime
 
 from dotenv import dotenv_values
 
-from util import to_snake_case
+from util import get_script_name, to_snake_case
 
 ENV_PATH = ".env"
 script_name = os.path.basename(__file__)  # ファイル名のみ取得
-OUTPUT_PATH = f"app_config/{script_name.replace('generate_', '')}"
+OUTPUT_PATH = f"src/app_config/{script_name.replace('generate_', '')}"
 SPLIT_MARK = "# --- 任意キー ---"
 
 
@@ -17,7 +17,7 @@ SPLIT_MARK = "# --- 任意キー ---"
 def generate_docstring_header(target_filename: str, generator_script: str) -> str:
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     return f'''"""
-{target_filename}
+{get_script_name(target_filename, True)}
 
 このファイルは `{generator_script}` によって自動生成されました。
 
@@ -138,7 +138,7 @@ def generate_env_config(output_path: str):
     with open(output_path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
 
-    print(f"✅ {script_name} を生成しました: {output_path}")
+    print(f"✅ {get_script_name(OUTPUT_PATH, True)} を生成しました: {output_path}")
 
 
 def main():

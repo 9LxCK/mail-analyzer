@@ -13,7 +13,7 @@ from app_config.logger_manager import LoggerManager
 
 logger = LoggerManager.get_logger(__name__)
 
-from util import decode_mime_words, encode_to_utf7, ensure_parentheses
+from util import decode_from_utf7, decode_mime_words, encode_to_utf7, ensure_parentheses
 
 
 @contextmanager
@@ -138,18 +138,19 @@ def select_mailbox(imap: imaplib.IMAP4, mailbox: str, readonly: bool = True) -> 
     """
     try:
         status, data = imap.select(mailbox, readonly=readonly)
+        decoded_mailbox = decode_from_utf7(mailbox)
         if status != "OK":
-            logger.warning(f"メールボックスの選択に失敗しました: '{mailbox}'（ステータス: {status}）")
+            logger.warning(f"メールボックスの選択に失敗しました: '{decoded_mailbox}'（ステータス: {status}）")
             return False
         if not data or data[0] == b"0":
-            logger.warning(f"メールボックスが空のためスキップ: '{mailbox}'（ステータス: {status}）")
+            logger.warning(f"メールボックスが空のためスキップ: '{decoded_mailbox}'（ステータス: {status}）")
             return False
         return True
     except imaplib.IMAP4.error as e:
-        logger.error(f"IMAPエラーが発生しました（メールボックス: '{mailbox}'）: {e}")
+        logger.error(f"IMAPエラーが発生しました（メールボックス: '{decoded_mailbox}'）: {e}")
         return False
     except Exception as e:
-        logger.error(f"予期しないエラーが発生しました（メールボックス: '{mailbox}'）: {e}")
+        logger.error(f"予期しないエラーが発生しました（メールボックス: '{decoded_mailbox}'）: {e}")
         return False
 
 
@@ -225,6 +226,7 @@ def list_mailboxes(imap: imaplib.IMAP4_SSL, ignore_list: Optional[list[str]] = N
     status, mailboxes = imap.list()
     mailbox_names = []
     ignore_set = set(ignore_list) if ignore_list else set()
+    skip_flg = False
     if status == "OK":
         for mbox in mailboxes:
             try:
@@ -232,6 +234,9 @@ def list_mailboxes(imap: imaplib.IMAP4_SSL, ignore_list: Optional[list[str]] = N
                     decoded = mbox.decode(errors="ignore")
                 else:
                     decoded = str(mbox)
+                # 選択不可のフォルダはスキップ
+                if '\\Noselect' in decoded:
+                    skip_flg = True
                 # ダブルクォートで囲まれた部分を抽出
                 match = re.search(r'"([^"]+)"\s*$', decoded)
                 if match:
@@ -242,6 +247,10 @@ def list_mailboxes(imap: imaplib.IMAP4_SSL, ignore_list: Optional[list[str]] = N
             except Exception:
                 logger.error(f"メールボックス名のデコードに失敗しました: {mbox}")
                 pass
+            if skip_flg:
+                logger.warning(f"メールボックスの選択不可のためスキップ: {name}")
+                skip_flg = False
+                continue
             if name not in ignore_set:
                 mailbox_names.append(name)
     else:
@@ -256,7 +265,7 @@ def collect_target_mailboxes(
     """検索対象とするメールボックス一覧を UTF-7 で返却する。"""
     if target_mailboxes:
         # 指定がある場合はそれを使用
-        mailbox_list = target_mailboxes
+        mailbox_list = [encode_to_utf7(mb) for mb in target_mailboxes]
     else:
         # 指定がなければ全件取得
         mailbox_list = list_mailboxes(imap)
@@ -264,7 +273,8 @@ def collect_target_mailboxes(
     # 除外対象の処理
     if ignored_mailboxes:
         ignored_set = set(ignored_mailboxes)
-        mailbox_list = [mb for mb in mailbox_list if mb not in ignored_set]
+        logger.debug(f"除外対象メールボックス: {sorted(ignored_set)}")
+        encoded_igored_set = [encode_to_utf7(mb) for mb in ignored_set]
+        mailbox_list = [mb for mb in mailbox_list if mb not in encoded_igored_set]
 
-    # UTF-7 にエンコードして返却
-    return [encode_to_utf7(mb) for mb in mailbox_list]
+    return mailbox_list

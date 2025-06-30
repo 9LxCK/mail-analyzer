@@ -39,6 +39,7 @@ IMAP 経由でメールボックスにアクセスし、指定条件に応じて
 
 ```env
 # --- 必須キー ---
+PYTHONPATH=src                              # メインリソースのルートフォルダ
 IMAP_HOST='**********'
 IMAP_USER='**********'
 IMAP_PASS='**********'
@@ -60,7 +61,7 @@ python -m tool.encrypt_env_key --show
 
 ### 4. `config.json` の設定
 
-このアプリケーションは `app_config/config.json` を使用して設定を読み込む。  
+このアプリケーションは `src/app_config/config.json` を使用して設定を読み込む。  
 以下、例を表示（必要に応じて値を修正すること）。
 
 ```json
@@ -109,12 +110,13 @@ python -m tool.encrypt_env_key --show
 
 ```bash
 # ConfigLoaderクラスの再生成
-python -m tool.generate_config_loader
+python -m src.tool.generate_config_loader
 # EnvConfigクラスの再生成
-python -m tool.generate_env_config
+python -m src.tool.generate_env_config
 ```
 
-- 補助ツールとして、以下のスクリプトを用意
+- 補助ツールとして、以下のスクリプトを用意  
+  作成した EXE ファイルを実行する場合は、EXE ファイルと同じ階層に `.env` `config.json` を配置すること
 
 | スクリプト名          | 内容                                                             |
 | --------------------- | ---------------------------------------------------------------- |
