@@ -1,4 +1,5 @@
 import time
+import traceback
 
 # システム環境変数読込
 from app_config.config_loader import ConfigLoader
@@ -52,6 +53,7 @@ def run(handler, *args, **kwargs):
         handler(*args, **kwargs)
     except Exception as e:
         logger.error(f"エラーが発生しました: {e}")
+        logger.debug(f"エラー詳細: {traceback.format_exc()}")
     finally:
         logger.info(f"処理を終了します: {handler_name}")
         _auto_exit_after_delay(ConfigLoader.EXIT_DELAY_SECONDS)  # N秒後に自動終了

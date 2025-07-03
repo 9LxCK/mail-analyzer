@@ -1,11 +1,10 @@
 import logging
 import os
+from pathlib import Path
 
 from cryptography.fernet import Fernet, InvalidToken
 
 from util import get_base_path, get_fallback_logger
-
-_DEFAULT_KEY_PATH = "secret.key"
 
 
 class FernetCipher:
@@ -18,7 +17,7 @@ class FernetCipher:
 
     @classmethod
     def get_instance(cls, key_path: str | None = None, logger: logging.Logger | None = None):
-        resolved_path = key_path or get_base_path(_DEFAULT_KEY_PATH)
+        resolved_path = key_path or str(Path(get_base_path(), "secret.key"))
         if resolved_path not in cls._instances:
             cls._instances[resolved_path] = cls(resolved_path, logger)
         return cls._instances[resolved_path]

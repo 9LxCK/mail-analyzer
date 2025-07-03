@@ -11,7 +11,7 @@ from app_config.constants import EnvKey
 from app_config.env_config import EnvConfig
 from app_config.fernet_cipher import FernetCipher
 from app_config.logger_manager import LoggerManager
-from util import get_script_name, load_config, to_snake_case
+from util import get_base_path, get_script_name, load_config, to_snake_case
 
 ENV_PATH = ".env"
 KEY_FILE = "secret.key"
@@ -109,7 +109,8 @@ def main():
     parser.add_argument("--show", action="store_true", help=".env に保存された暗号化情報を復号して表示")
 
     args = parser.parse_args()
-    f = FernetCipher.get_instance(str(two_levels_up / KEY_FILE), logger=logger)
+    str_path = str(Path(get_base_path(KEY_FILE), KEY_FILE))  # 当該スクリプトはルートディレクトリから実行される想定
+    f = FernetCipher.get_instance(str_path, logger=logger)
 
     # パスワードが未指定なら安全な対話入力
     try:
