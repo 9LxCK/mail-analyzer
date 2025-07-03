@@ -109,7 +109,7 @@ def main():
     parser.add_argument("--show", action="store_true", help=".env に保存された暗号化情報を復号して表示")
 
     args = parser.parse_args()
-    f = FernetCipher.get_instance(logger=logger)
+    f = FernetCipher.get_instance(str(two_levels_up / KEY_FILE), logger=logger)
 
     # パスワードが未指定なら安全な対話入力
     try:
