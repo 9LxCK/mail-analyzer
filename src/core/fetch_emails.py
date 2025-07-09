@@ -222,12 +222,13 @@ def _parse_fetch_metadata(mailbox: str, data: tuple[bytes, bytes]) -> Optional[E
         except ValueError:
             pass
 
-    # TO 抽出、MIME デコードつき
+    # FROM TO 抽出、MIME デコードつき
     parser = HeaderParser()
     headers = parser.parsestr(body_str)
     to_address = decode_mime_words(headers.get("To"))
+    from_address = decode_mime_words(headers.get("From"))
 
-    return EmailRecord(mailbox=mailbox, uid=uid, to=to_address, internaldate=internaldate)
+    return EmailRecord(mailbox=mailbox, uid=uid, from_=from_address ,to=to_address, internaldate=internaldate)
 
 
 def filter_and_sort_records(
@@ -266,7 +267,7 @@ def fetch_email_metadata(imap: imaplib.IMAP4_SSL, email_records: EmailRecords) -
     fetch_data = {}
     for mailbox, batch_uids in _iter_mailbox_batches(imap, email_records, ConfigLoader.FETCH_SIZE):
         fetch_data = fetch_raw_by_mailbox_and_uid_list(
-            imap, mailbox, batch_uids, "(BODY.PEEK[HEADER.FIELDS (TO)] INTERNALDATE)"
+            imap, mailbox, batch_uids, "(BODY.PEEK[HEADER.FIELDS (FROM TO)] INTERNALDATE)"
         )
         # print(f"Mailbox: {mailbox} / UIDs: {batch_uids[:3]}... / Fetch Data: {fetch_data[str(batch_uids[0])]}")
         for uid, data in fetch_data.items():
@@ -278,7 +279,7 @@ def fetch_email_metadata(imap: imaplib.IMAP4_SSL, email_records: EmailRecords) -
     # 最初の項目を確認
     first_key, first_record = next(iter(email_records.items()))
     logger.debug(
-        f"(1件目データ) メールボックス: {first_key[0]} / UID: {first_key[1]} / internaldate: {first_record.get_internaldate_text()} / to: {first_record.to}"
+        f"(1件目データ) メールボックス: {first_key[0]} / UID: {first_key[1]} / internaldate: {first_record.get_internaldate_text()} / from: {first_record.from_} / to: {first_record.to}"
     )
 
     return email_records
@@ -335,12 +336,14 @@ def write_email_records_to_file(filepath: str, records: EmailRecords) -> bool:
 
     for (mailbox, uid), record in records.items():
         subject = record.subject or ""
+        from_ = record.from_ or ""
         to = record.to or ""
         date = record.get_internaldate_text()  # internaldate → 文字列（例: "2025-06-18 10:30"）
         body = clean_text(record.body or "")
 
         lines.append(f"Mailbox: {mailbox}")
         lines.append(f"UID: {uid}")
+        lines.append(f"From: {from_}")
         lines.append(f"To: {to}")
         lines.append(f"Subject: {subject}")
         lines.append(f"Date: {date}")

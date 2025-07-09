@@ -8,6 +8,7 @@ class EmailRecord:
     mailbox: str
     uid: int
     internaldate: Optional[datetime] = None
+    from_: Optional[str] = None
     to: Optional[str] = None
     subject: Optional[str] = None
     body: Optional[str] = None
